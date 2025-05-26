@@ -27,7 +27,7 @@ tokenizer_path = os.path.join('tokenizer', 'tokenizer_train10M.json')
 
 # model directory and name
 model_dir = os.path.join(os.path.dirname(__file__), "models")
-model_name = "gpt2-cntx256-param729M-data10M"
+model_name = "gpt2-cntx256-param335M-data10M"
 last_checkpoint = os.path.join(model_dir, f"{model_name}.pt")
 os.makedirs(model_dir, exist_ok=True)
 
@@ -42,7 +42,7 @@ perplexity_path = os.path.join(log_dir, f"{model_name}_perplexity.png")
 
 # Setting up the device
 
-device = "cuda" if torch.cuda.is_available() else "cpu" 
+device = "cuda:3" if torch.cuda.is_available() else "cpu" 
 
 # Tokenizer
 
@@ -70,10 +70,10 @@ train_loader , eval_loader , test_loader = get_dataloaders(
 config = GPT2Config(
         vocab_size=tokenizer.vocab_size,
         n_positions= 2 * tokenizer.model_max_length,
-        n_embd=1536,
+        n_embd=1024,
         n_layer=24,
         n_head=16,
-        n_inner=6144,
+        n_inner=4096,
         pad_token_id=tokenizer.convert_tokens_to_ids(tokenizer.pad_token),
 ) 
 
@@ -164,6 +164,7 @@ for epoch in range(num_epochs):
         if patience_counter >= patience:
             with open(log_file, "a") as f:
                 f.write(f"Early stopping triggered at epoch {epoch+1}\n")
+                 
             break
 
 

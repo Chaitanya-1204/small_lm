@@ -1,0 +1,19 @@
+============================================================
+Model Summary Log
+============================================================
+Tokenizer Path: tokenizer/tokenizer_train10M.json
+Model Name: gpt2-cntx256-param335M-data10M
+Sequence Length: 256
+Batch Size: 16
+Num Epochs: 20
+Warmup Steps: 2000
+Total Training Steps: 76980
+Total Model Parameters: 335.60M
+Model Config:
+  - Embedding Dim: 1024
+  - Num Layers: 24
+  - Num Heads: 16
+  - Inner Dim: 4096
+============================================================
+
+--------------------------------------------------------------------------------

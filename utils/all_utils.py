@@ -235,7 +235,7 @@ def get_tokenizer(tokenizer_path, seq_length):
     
     return tokenizer
 
-def get_model(tokenizer , log_file, last_checkpoint , device):
+def get_model(config , log_file, last_checkpoint , device):
     
     '''
         Get the GPT-2 model and its configuration.
@@ -252,16 +252,7 @@ def get_model(tokenizer , log_file, last_checkpoint , device):
     
     '''
     
-    # Configure the model parameters
-    config = GPT2Config(
-        vocab_size=tokenizer.vocab_size,
-        n_positions= 2 * tokenizer.model_max_length,
-        n_embd=1536,
-        n_layer=24,
-        n_head=16,
-        n_inner=6144,
-        pad_token_id=tokenizer.convert_tokens_to_ids(tokenizer.pad_token),
-    ) 
+    
     
     # Initialize the model
     model = GPT2LMHeadModel(config)
@@ -286,4 +277,4 @@ def get_model(tokenizer , log_file, last_checkpoint , device):
     with open(log_file, "a") as f:
         f.write(f"Model Parameters: {model.num_parameters() / 1e6:.2f}M\n")
         
-    return model, config
+    return model
