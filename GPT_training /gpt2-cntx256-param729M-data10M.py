@@ -20,27 +20,25 @@ num_epochs = 20
 num_workers = 8
 batch_size = 16
 
+print(os.getcwd())
 # Paths 
 train_path = os.path.join("cleaned_datasets" , "train_10M")
 tokenizer_path = os.path.join('tokenizer', 'tokenizer_train10M.json')
 
 # model directory and name
-model_dir = "train_10M/gpt_models"
+model_dir = os.path.join(os.path.dirname(__file__), "models")
 model_name = "gpt2-cntx256-param729M-data10M"
 last_checkpoint = os.path.join(model_dir, f"{model_name}.pt")
 os.makedirs(model_dir, exist_ok=True)
 
-# Plots 
-
-loss_path = f"GPT_training/logs/{model_name}_loss.png"
-perplexity_path = f"GPT_training/logs/{model_name}_perplexity.png"
-os.makedirs("GPT_training/logs", exist_ok=True)
-
 # Logs 
-
-log_dir = "GPT_training/logs"
+log_dir = os.path.join(os.path.dirname(__file__), "logs")
 os.makedirs(log_dir, exist_ok=True)
 log_file = os.path.join(log_dir, f"{model_name}_training_log.txt")
+
+# Plots 
+loss_path = os.path.join(log_dir, f"{model_name}_loss.png")
+perplexity_path = os.path.join(log_dir, f"{model_name}_perplexity.png")
 
 # Setting up the device
 
@@ -69,7 +67,7 @@ train_loader , eval_loader , test_loader = get_dataloaders(
 
 # Get the model and its configuration
 
-model , config = get_model(tokenizer , log_file  , last_checkpoint)
+model , config = get_model(tokenizer , log_file  , last_checkpoint , device)
 
 # Write initial log information
 with open(log_file, "w") as f:

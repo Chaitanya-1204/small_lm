@@ -215,6 +215,8 @@ def get_tokenizer(tokenizer_path, seq_length):
             tokenizer: The initialized tokenizer.
     
     '''
+    
+    print(tokenizer_path)
   
     # Load the tokenizer from the specified path
     tokenizer = GPT2TokenizerFast(tokenizer_file=tokenizer_path)
