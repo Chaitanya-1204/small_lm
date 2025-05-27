@@ -181,3 +181,5 @@ cleaned_datasets/
 tokenizer/
 train_10M/
 train_100/
+GPT_training/models/
+distillation/models

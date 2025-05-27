@@ -16,7 +16,7 @@ from utils.all_utils import train , eval , get_dataloaders , get_tokenizer , get
 #Hyperparameters
 
 seq_length = 256
-num_epochs = 20
+num_epochs = 125
 num_workers = 8
 batch_size = 16
 
@@ -27,7 +27,7 @@ tokenizer_path = os.path.join('tokenizer', 'tokenizer_train10M.json')
 
 # model directory and name
 model_dir = os.path.join(os.path.dirname(__file__), "models")
-model_name = "gpt2-cntx256-param729M-data10M"
+model_name = "gpt2-cntx256-param729M-data10M_epochs125"
 last_checkpoint = os.path.join(model_dir, f"{model_name}.pt")
 os.makedirs(model_dir, exist_ok=True)
 
@@ -42,7 +42,7 @@ perplexity_path = os.path.join(log_dir, f"{model_name}_perplexity.png")
 
 # Setting up the device
 
-device = "cuda" if torch.cuda.is_available() else "cpu" 
+device = "cuda:1" if torch.cuda.is_available() else "cpu" 
 
 # Tokenizer
 
@@ -94,7 +94,7 @@ with open(log_file, "w") as f:
     f.write(f"Sequence Length: {seq_length}\n")
     f.write(f"Batch Size: {batch_size}\n")
     f.write(f"Num Epochs: {num_epochs}\n")
-    f.write(f"Warmup Steps: 2000\n")
+    f.write(f"Warmup Steps: 1450\n")
     f.write(f"Total Training Steps: {len(train_loader) * num_epochs}\n")
     f.write(f"Total Model Parameters: {total_params / 1e6:.2f}M\n")
     f.write(f"Model Config:\n")
@@ -111,7 +111,7 @@ optimizer = torch.optim.AdamW(model.parameters() , lr =1e-4 , weight_decay = 0.0
 scheduler = get_scheduler(
     "cosine",
     optimizer=optimizer,
-    num_warmup_steps=2000,
+    num_warmup_steps=1450,
     num_training_steps=len(train_loader) * num_epochs
 )
 
@@ -121,8 +121,7 @@ evaluation_loss = []
 
 # Initializing variables for early stopping
 best_eval_loss = float('inf')
-patience = 3
-patience_counter = 0
+
 
 # Start training and evaluation loop
 for epoch in range(num_epochs):
@@ -155,16 +154,9 @@ for epoch in range(num_epochs):
     # Check if the evaluation loss improved
     if eval_loss < best_eval_loss:
         best_eval_loss = eval_loss
-        patience_counter = 0
+    
         torch.save(model.state_dict(), last_checkpoint)
 
-           
-    else:
-        patience_counter += 1
-        if patience_counter >= patience:
-            with open(log_file, "a") as f:
-                f.write(f"Early stopping triggered at epoch {epoch+1}\n")
-            break
 
 
 # Final evaluation on the test set

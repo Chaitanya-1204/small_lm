@@ -1,0 +1,27 @@
+============================================================
+Model Summary Log
+============================================================
+Tokenizer Path: tokenizer/tokenizer_train10M.json
+Model Name: gpt2-cntx256-param729M-data10M_epochs125
+Sequence Length: 256
+Batch Size: 16
+Num Epochs: 125
+Warmup Steps: 2000
+Total Training Steps: 481125
+Total Model Parameters: 729.90M
+Model Config:
+  - Embedding Dim: 1536
+  - Num Layers: 24
+  - Num Heads: 16
+  - Inner Dim: 6144
+============================================================
+
+--------------------------------------------------------------------------------
+============================================================
+Training and Evaluation Results for Epoch 1
+Seq Length: 256
+Train Loss: 4.5008 | Perplexity: 90.0895
+Eval  Loss: 4.2597 | Perplexity: 70.7895
+============================================================
+
+--------------------------------------------------------------------------------

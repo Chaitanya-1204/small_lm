@@ -42,7 +42,7 @@ perplexity_path = os.path.join(log_dir, f"{model_name}_perplexity.png")
 
 # Setting up the device
 
-device = "cuda:1" if torch.cuda.is_available() else "cpu" 
+device = "cuda" if torch.cuda.is_available() else "cpu" 
 
 # Tokenizer
 

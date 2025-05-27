@@ -22,12 +22,12 @@ batch_size = 16
 
 
 # Paths 
-train_path = os.path.join("cleaned_datasets" , "train_10M")
-tokenizer_path = os.path.join('tokenizer', 'tokenizer_train10M.json')
+train_path = os.path.join("cleaned_datasets" , "train_100M")
+tokenizer_path = os.path.join('tokenizer', 'tokenizer_train100M.json')
 
 # model directory and name
 model_dir = os.path.join(os.path.dirname(__file__), "models")
-model_name = "gpt2-cntx256-param335M-data10M"
+model_name = "gpt2-cntx256-param335M-data100M"
 last_checkpoint = os.path.join(model_dir, f"{model_name}.pt")
 os.makedirs(model_dir, exist_ok=True)
 
@@ -42,7 +42,7 @@ perplexity_path = os.path.join(log_dir, f"{model_name}_perplexity.png")
 
 # Setting up the device
 
-device = "cuda:3" if torch.cuda.is_available() else "cpu" 
+device = "cuda" if torch.cuda.is_available() else "cpu" 
 
 # Tokenizer
 

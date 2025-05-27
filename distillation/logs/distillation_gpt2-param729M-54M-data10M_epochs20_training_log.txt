@@ -1,0 +1,13 @@
+============================================================
+Distillation Training Log
+============================================================
+Model Name: distillation_gpt2-param729M-54M-data10M_epochs20
+Sequence Length: 256
+Batch Size: 16
+Num Epochs: 20
+Warmup Steps: 1400
+Total Training Steps: 76980
+Teacher Model Parameters: 729.90M
+Student Model Parameters: 54.48M
+============================================================
+

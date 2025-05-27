@@ -9,6 +9,7 @@ import torch
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 from transformers import GPT2TokenizerFast ,  GPT2Config , GPT2LMHeadModel
+import torch.nn.functional as F
 
 # Import custom modules
 from utils.data import BabyLmDataset , collate_fn
@@ -278,3 +279,92 @@ def get_model(config , log_file, last_checkpoint , device):
         f.write(f"Model Parameters: {model.num_parameters() / 1e6:.2f}M\n")
         
     return model
+
+def distillation_loss(student_logits, teacher_logits, labels, temperature=2.0, alpha=0.5):
+    # Resize teacher logits to match student shape if needed
+    teacher_soft = F.log_softmax(teacher_logits / temperature, dim=-1)
+    student_soft = F.log_softmax(student_logits / temperature, dim=-1)
+    
+    # KLD loss between student and teacher soft logits
+    kld_loss = F.kl_div(student_soft, teacher_soft, reduction='batchmean', log_target=True) * (temperature ** 2)
+
+    # Normal cross-entropy loss
+    ce_loss = F.cross_entropy(student_logits.view(-1, student_logits.size(-1)),
+                              labels.view(-1),
+                              ignore_index=-100)
+
+    return alpha * ce_loss + (1 - alpha) * kld_loss
+
+
+
+
+def distill_train(teacher_model, student_model , dataloader, optimizer, device, epoch , scheduler):
+    
+    '''Train the model for one epoch.
+        Args: 
+            model: The model to train.
+            dataloader: DataLoader for the training data.
+            optimizer: Optimizer for updating model parameters.
+            device: Device to run the model on (CPU or GPU).
+            epoch: Current epoch number.
+            scheduler: Learning rate scheduler.
+            
+        Returns:
+            avg_loss: Average loss for the epoch.
+            
+        '''
+    # Set the model to training mode
+    student_model.train()
+    
+    # Initialize variables to track total loss and tokens processed
+    total_loss = 0.0
+    total_tokens = 0
+    
+    # Create a progress bar for the training loop
+    loop = tqdm(dataloader, desc=f"Epoch {epoch + 1} : ", leave=False)
+    
+    for batch in loop:
+        # Move input data to the specified device
+        input_ids = batch["input_ids"].to(device)
+        attention_mask = batch["attention_mask"].to(device)
+        labels = batch["labels"].to(device)
+        
+        # Zero the gradients
+        optimizer.zero_grad()
+        
+        # Forward pass with mixed precision
+        with torch.autocast(device_type = "cuda" , dtype  = torch.bfloat16):
+             
+            with torch.no_grad():
+                teacher_outputs = teacher_model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
+                
+            student_outputs = student_model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
+            loss = distillation_loss(
+                        student_outputs.logits, 
+                        teacher_outputs.logits, 
+                        labels,
+                        temperature=2.0, 
+                        alpha=0.5)
+
+        # Backward pass and optimization step
+        loss.backward()
+        optimizer.step()
+        scheduler.step()
+        
+        
+        # Update the progress bar with the current loss and learning rate
+        current_lr = scheduler.get_last_lr()[0]
+        loop.set_postfix(loss=loss.item(), lr=current_lr)
+        
+        # Calculate the number of active tokens in the labels
+        active_tokens = (labels != -100).sum().item()
+
+        # Accumulate the loss and tokens processed
+        total_loss += loss.item() * active_tokens
+        total_tokens += active_tokens
+    
+    # Calculate the average loss for the epoch
+    avg_loss = total_loss / total_tokens
+    
+    
+    return avg_loss
